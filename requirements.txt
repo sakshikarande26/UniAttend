@@ -1,0 +1,11 @@
+streamlit
+pandas
+numpy
+face_recognition
+opencv-python
+streamlit
+opencv-python
+face-recognition
+numpy
+pandas
+Pillow
