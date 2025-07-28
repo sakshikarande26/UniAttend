@@ -3,67 +3,94 @@
 {% block content %}
 <div class="hero-section">
     <h1>Welcome to UniAttend</h1>
-    <p>A seamless and modern solution for tracking attendance through facial recognition. Effortlessly elegant, powerfully simple.</p>
+    <p>A seamless, modern, and elegant solution for tracking attendance through facial recognition. Effortlessly powerful, simply beautiful.</p>
 </div>
 
-<div class="action-container">
-    <div class="action-box">
-        <h2>Upload a Photo</h2>
-        <form action="/upload" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <input type="file" class="form-control-file" id="file" name="file" accept="image/*" required>
-            </div>
-            <button type="submit" class="btn btn-custom">Upload & Recognize</button>
-        </form>
+<div class="row">
+    <!-- Upload Card -->
+    <div class="col-lg-6 mb-4">
+        <div class="action-card" style="animation-delay: 0.3s;">
+            <h2>Upload a Photo</h2>
+            <form action="/upload" method="post" enctype="multipart/form-data">
+                <div class="form-group">
+                    <input type="file" class="form-control-file" id="file" name="file" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary-custom">Upload & Recognize</button>
+            </form>
+        </div>
     </div>
 
-    <div class="action-box">
-        <h2>Capture from Webcam</h2>
-        <video id="video" width="100%" autoplay muted playsinline style="border-radius: 8px; margin-bottom: 1rem;"></video>
-        <button id="snap" class="btn btn-custom">Capture & Recognize</button>
-        <canvas id="canvas" style="display:none;"></canvas>
+    <!-- Webcam Card -->
+    <div class="col-lg-6 mb-4">
+        <div class="action-card" style="animation-delay: 0.4s;">
+            <h2>Capture from Webcam</h2>
+            <button id="openWebcam" class="btn btn-primary-custom">Open Webcam</button>
+            <div id="webcamContainer" class="webcam-container" style="display:none;">
+                <video id="video" width="100%" autoplay muted playsinline></video>
+                <button id="snap" class="btn btn-primary-custom mt-3">Capture & Recognize</button>
+                <canvas id="canvas" style="display:none;"></canvas>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const openWebcamBtn = document.getElementById('openWebcam');
+    const webcamContainer = document.getElementById('webcamContainer');
     const video = document.getElementById('video');
     const snap = document.getElementById('snap');
     const canvas = document.getElementById('canvas');
     const context = canvas.getContext('2d');
 
-    // Access webcam
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            video.srcObject = stream;
-        })
-        .catch(err => {
-            console.error("Error accessing webcam: ", err);
-            alert("Could not access the webcam. Please ensure it is enabled and permissions are granted.");
-        });
+    let stream = null;
 
-    // Capture photo and send to server
-    snap.addEventListener('click', () => {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const dataURL = canvas.toDataURL('image/jpeg');
-        
-        fetch('/capture', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ image: dataURL })
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                alert('Attendance marked for: ' + data.names.join(', '));
-                window.location.href = '/attendance';
-            } else {
-                alert(data.message || 'Could not recognize face. Please try again.');
-            }
-        });
+    // 1. Open Webcam
+    openWebcamBtn.addEventListener('click', () => {
+        if (!stream) { // Only get media if not already running
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(mediaStream => {
+                    stream = mediaStream;
+                    video.srcObject = stream;
+                    webcamContainer.style.display = 'block';
+                    openWebcamBtn.style.display = 'none'; // Hide the 'Open' button
+                })
+                .catch(err => {
+                    console.error("Error accessing webcam: ", err);
+                    alert("Could not access the webcam. Please ensure it is enabled and permissions are granted in your browser settings.");
+                });
+        }
     });
+
+    // 2. Capture Photo and Send
+    snap.addEventListener('click', () => {
+        if (stream) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            
+            fetch('/capture', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: dataURL })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '/attendance';
+                } else {
+                    alert(data.error || 'Could not recognize the face. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error during capture:', error);
+                alert('An error occurred while sending the image.');
+            });
+        } else {
+            alert("Webcam is not active. Please open it first.");
+        }
+    });
+});
 </script>
 {% endblock %}
