@@ -57,6 +57,9 @@ To get UniAttend up and running on your local machine, follow these simple steps
 
 <img width="2851" height="1672" alt="output" src="https://github.com/user-attachments/assets/51d70538-1d98-42ba-9869-2309d4332fd9" />
 
+<img width="2880" height="1800" alt="image" src="https://github.com/user-attachments/assets/5cb5bb5d-c14d-441f-b94e-7a82c0946d56" />
+
+
 
 ---
 
