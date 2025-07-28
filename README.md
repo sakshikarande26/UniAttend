@@ -55,7 +55,8 @@ To get UniAttend up and running on your local machine, follow these simple steps
 
 ## 🖼️ Screenshots
 
-*(Placeholder for screenshots of the application)*
+<img width="2851" height="1672" alt="output" src="https://github.com/user-attachments/assets/51d70538-1d98-42ba-9869-2309d4332fd9" />
+
 
 ---
 
